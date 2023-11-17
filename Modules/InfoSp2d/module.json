@@ -1,0 +1,11 @@
+{
+    "name": "InfoSp2d",
+    "alias": "infosp2d",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\InfoSp2d\\Providers\\InfoSp2dServiceProvider"
+    ],
+    "files": []
+}

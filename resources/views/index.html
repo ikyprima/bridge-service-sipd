@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .container {
+          margin-top: 20px;
+        }
+      </style>
+      <style>
+     
+    
+        .select2-container .select2-selection {
+            width: 100%;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 0.3rem;
+    
+            -webkit-transition: border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+            transition: border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+        }
+    
+        .select2-container .select2-selection--single .select2-selection__rendered {
+    
+            line-height: calc(1.1em + 1.2rem);
+            color: #495057;
+        }
+    
+        .select2-container .select2-selection--single {
+            height: calc(1.1em + 0.75rem + 8px) !important;
+        }
+        
+    </style>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.2.0/css/datepicker.min.css" rel="stylesheet">
+
+</head>
+<body>
+    <div class="container">
+      <form>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="inputSkpd">SKPD</label>
+            <select class="js-data-example-ajax form-control" id="select-skpd"></select>
+          </div>
+       
+          <div class="form-group col-md-3">
+            <label for="inputSkpd">Bulan</label>
+            <div class=" input-group mb-3">
+            
+              <input type="text" class="form-control"  id="datepicker"  placeholder="" aria-label="" aria-describedby="">
+              <div class="input-group-append">
+                <button class="btn btn-outline-secondary" id="filterdata" type="button">FILTER</button>
+              </div>
+            </div>
+          </div>
+          
+          
+      
+        </div>
+      </form>
+     
+        <table id="myTableDatatable" class="table table-bordered">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Tanggal</th>
+                <th class="col-1">No SP2D</th>
+                <th>Rekening Tujuan</th>
+                <th>Nilai SP2D</th>
+                <th>Nilai Detail</th>
+                <th>Status Transaksi</th>
+
+              </tr>
+            </thead>
+            <tbody>
+            
+            </tbody>
+       
+  
+  </table>
+  <nav aria-label="Page navigation example" id="halaman">
+    <ul class="pagination" >
+      
+    </ul>
+  </nav>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.2.0/js/bootstrap-datepicker.min.js"></script>
+  <script>
+    let myTableDatatable;
+    let base_url = "http://121.100.18.62/";
+    // let base_url = "http://192.168.100.10/"; 
+    // let base_url = "http://192.168.100.212/"; 
+    $(document).ready(function() {
+      $.ajax({
+            url: base_url+'api/data-skpd',
+            type: 'GET',
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function(result){
+              $("#select-skpd").find('option').remove().end()
+            
+              $('#select-skpd').append('<option value="">-pilih-</option>');
+              
+              for(i in result ){
+              
+
+                  $('#select-skpd').append('<option value="'+result[i].value+'">'+result[i].label+'</option>');
+                
+              }
+              $('#select-skpd').select2({
+              
+                width: 'resolve',
+              });
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+                alert('Error adding SKPD');
+            }
+          });
+
+      $("#datepicker").datepicker( {
+          format: "mm-yyyy",
+          startView: "months", 
+          minViewMode: "months",
+          autoclose: true,
+
+      });
+        $.fn.dataTableExt.oApi.fnPagingInfo = function(oSettings) {
+                  return {
+                      "iStart": oSettings._iDisplayStart,
+                      "iEnd": oSettings.fnDisplayEnd(),
+                      "iLength": oSettings._iDisplayLength,
+                      "iTotal": oSettings.fnRecordsTotal(),
+                      "iFilteredTotal": oSettings.fnRecordsDisplay(),
+                      "iPage": Math.ceil(oSettings._iDisplayStart / oSettings._iDisplayLength),
+                      "iTotalPages": Math.ceil(oSettings.fnRecordsDisplay() / oSettings._iDisplayLength)
+                  };
+              };
+        
+            //load data table
+            getDataTable();
+
+            $('#filterdata').on('click', function(event){
+            
+              $('#myTableDatatable').DataTable().clear().destroy();
+              getDataTable();
+                //(... rest of your JS code)
+            });
+
+        
+        
+        // let base_url = "http://127.0.0.1:8000/";
+        // $.ajax({
+        //     url: base_url+"api/history-sp2d",
+        //     type: 'POST',
+        //     contentType: false,
+        //     cache: false,
+        //     processData: false,
+        //     success: function(result){
+
+        //         var tableBody = $('#myTable tbody');
+        //         var halaman = $('#halaman ul');
+
+        //         result.data.forEach(function(item) {
+        //         var row = $('<tr>');
+        //         $('<td>').text(item.created_at).appendTo(row);
+
+        //         $('<td class="col-1">').text(item.nomor_sp2d).appendTo(row);
+        //         $('<td>').text(item.nomor_rekening_bank_pegawai+' a.n '+item.nama_rekening_bank).appendTo(row);
+        //         $('<td>').text(formatRupiah(item.nilaiSp2d, 'Rp. ') ).appendTo(row);
+        //         $('<td>').html('<ul >'+
+        //                         '<li>Netto      :'+item.amount+' </li>'+
+        //                         '<li>Potongan   :'+item.total_potongan+' </li>'+
+        //                         '<li>Pajak      :'+item.total_pajak+'  </li>'+
+        //                         '</ul>' ).appendTo(row);
+        //         $('<td>').html('<b>'+item.status+'</b> '+item.keterangan+' ').appendTo(row);
+        //         tableBody.append(row);
+        //         });
+
+        //         result.halaman.forEach(function(item){
+        //         if(item.aktif==false && $.isNumeric(item.title)){
+        //             let li = $('<li class="page-item active">').html('<button class="page-link" data-url="'+item.link+'" >'+item.title+'</button>');
+        //                 halaman.append(li);
+        //             }else if(item.aktif==false){
+                        
+        //                 let li = $('<li class="page-item disabled">').html('<button class="page-link" data-url="'+item.link+'" >'+item.title+'</button>');
+        //                 halaman.append(li);
+        //             }
+        //             else{
+        //             let li = $('<li class="page-item">').html('<button class="page-link" data-url="'+item.link+'" >'+item.title+'</button>');
+        //                 halaman.append(li);
+        //             }
+                  
+                    
+        //         });
+
+        //          $('.page-link').on('click', function(event){
+                 
+        //             var url= $(this).data('url');
+        //             // console.log(url);
+        //             getData(url);
+        //               //(... rest of your JS code)
+        //           });
+            
+           
+        //     },
+        //     error: function(jqXHR, textStatus, errorThrown){
+        //     alert('Error adding / update data');
+        //     }
+        // });
+
+      
+
+      
+    });
+
+    function getDataTable(){
+      myTableDatatable = $('#myTableDatatable').DataTable({
+                initComplete: function() {
+                    var api = this.api();
+                    $('#myTableDatatable_filter input')
+                        .off('.DT')
+                        .on('keyup.DT', function(e) {
+                            if (e.keyCode == 13) {
+                                api.search(this.value).draw();
+                            }
+                        });
+                },
+                bPaginate: true,
+                bLengthChange: false,
+                bFilter: false,
+                bInfo: false,
+                bAutoWidth: false,
+                searching: true,
+                responsive: true,
+                processing: true,
+                serverSide: true,
+                ordering: false,
+
+                language: {
+                    sProcessing: "Mohon Tunggu...",
+                    info: "Menampilkan Halaman _PAGE_ Dari _PAGES_",
+                    infoEmpty: "Tidak Ada Data",
+                    infoFiltered: "(Pencarian dari _MAX_ total data)",
+                    lengthMenu: "Menampilkan _MENU_ data per halaman",
+                    search: "Pencarian :",
+                    zeroRecords: "Maaf! tidak ada yang cocok",
+                },
+                ajax: {
+
+                    // url: "/loket/list-pasien-new",
+                    url: base_url+"api/history-sp2d",
+                    type: "post",
+                    processData: true,
+                    data: function (d) {
+                        // Add page information to the request
+                    
+                        d.id_skpd = $('#select-skpd').val();
+                        d.bulantahun = $('#datepicker').val(); //bulan dan tahun (12-2023)
+                        d.page = (d.start / d.length) + 1; // Current page number
+                      
+                        return d;
+                    }
+                  
+                },
+
+
+                columns: [{
+                        data: null,
+                        name: 'no',
+                        visible: true,
+                        className: "text-center",
+                       
+
+                    },
+                    
+                    {
+                        data: 'created_at',
+                        name: 'created_at',
+                        className: "text-left",
+                        
+
+
+                    },
+                    
+                    {
+                        data: 'nomor_sp2d',
+                        name: 'nomor_sp2d',
+                        className: "text-left",
+
+
+                    },
+                    {
+                        data: null,
+                        name: 'rek',
+                        className: "text-left",
+                        render: function(data, type, row) {
+                          return row.nomor_rekening_bank_pegawai +' a.n '+  row.nama_rekening_bank
+                        },
+                    },
+                    {
+                        data: 'nilaiSp2d',
+                        name: 'rek',
+                        className: "text-left",
+                        render: function(data, type, row) {
+                          return formatRupiah(data, 'Rp. ') 
+                        },
+                    },
+                    {
+                        data: null,
+                        name: 'detail',
+                        className: "text-left",
+                        render: function(data, type, row) {
+
+                          let det=   '<ul >'+
+                                '<li>Netto      :'+formatRupiah(row.amount, 'Rp. ')  +' </li>'+
+                                '<li>Potongan   :'+formatRupiah(row.total_potongan, 'Rp. ')+' </li>'+
+                                '<li>Pajak      :'+formatRupiah(row.total_pajak,'Rp. ')+'  </li>'+
+                                '</ul>'
+                          return det
+                        },
+                    },
+                    {
+                        data: null,
+                        name: 'detail',
+                        className: "text-left",
+                        render: function(data, type, row) {
+
+                          let stat=  '<b>'+row.status+'</b> '+row.keterangan   
+                          return stat
+
+                        },
+                    },
+                   
+                  
+
+                  
+                    
+                    
+
+                   
+
+
+                ],
+                rowCallback: function(row, data, iDisplayIndex) {
+                    var info = this.fnPagingInfo();
+                    var page = info.iPage;
+                    var length = info.iLength;
+                    var index = page * length + (iDisplayIndex + 1);
+                    $('td:eq(0)', row).html(index);
+                }
+            });
+    }
+
+    function getData(url,parameter=null){
+
+      $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: false,
+            cache: false,
+            processData: false,
+            crossDomain: true,
+          
+            success: function(result){
+
+              let tableBody = $('#myTable tbody');
+              var halaman = $('#halaman ul');
+
+              tableBody.empty();
+              halaman.html('');
+              
+              result.data.forEach(function(item) {
+                var row = $('<tr>');
+                $('<td>').text(item.created_at).appendTo(row);
+
+                $('<td class="col-1">').text(item.nomor_sp2d).appendTo(row);
+                $('<td>').text(item.nomor_rekening_bank_pegawai+' a.n '+item.nama_rekening_bank).appendTo(row);
+                $('<td>').text(formatRupiah(item.nilaiSp2d, 'Rp. ') ).appendTo(row);
+                $('<td>').html('<ul >'+
+                                '<li>Netto      :'+item.amount+' </li>'+
+                                '<li>Potongan   :'+item.total_potongan+' </li>'+
+                                '<li>Pajak      :'+item.total_pajak+'  </li>'+
+                                '</ul>' ).appendTo(row);
+                $('<td>').html('<b>'+item.status+'</b> '+item.keterangan+' ').appendTo(row);
+                tableBody.append(row);
+                });
+
+                result.halaman.forEach(function(item){
+                if(item.aktif==false && $.isNumeric(item.title)){
+                    let li = $('<li class="page-item active">').html('<button class="page-link" data-url="'+item.link+'" >'+item.title+'</button>');
+                        halaman.append(li);
+                    }else if(item.aktif==false){
+                        
+                        let li = $('<li class="page-item disabled">').html('<button class="page-link" data-url="'+item.link+'" >'+item.title+'</button>');
+                        halaman.append(li);
+                    }
+                    else{
+                    let li = $('<li class="page-item">').html('<button class="page-link" data-url="'+item.link+'" >'+item.title+'</button>');
+                        halaman.append(li);
+                    }
+                  
+                    
+                });
+
+                 $('.page-link').on('click', function(event){
+                 
+                    var url= $(this).data('url');
+                    // console.log(url);
+                    getData(url);
+                      //(... rest of your JS code)
+                  });
+            
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+            alert('Error adding / update data');
+            }
+        });
+   
+      console.log(parameter);
+    }
+    function formatRupiah(angka, prefix){
+			var number_string = angka.replace(/[^,\d]/g, '').toString(),
+			split   		= number_string.split(','),
+			sisa     		= split[0].length % 3,
+			rupiah     		= split[0].substr(0, sisa),
+			ribuan     		= split[0].substr(sisa).match(/\d{3}/gi);
+ 
+			// tambahkan titik jika yang di input sudah menjadi angka ribuan
+			if(ribuan){
+				separator = sisa ? '.' : '';
+				rupiah += separator + ribuan.join('.');
+			}
+ 
+			rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+			return prefix == undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
+		}
+  </script>
+
+</body>
+</html>
