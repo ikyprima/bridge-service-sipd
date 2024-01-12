@@ -6,12 +6,12 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use App\Models\User;
-use Modules\Admin\Entities\MenuItem;
+use App\Models\MenuItem;
 
 
 use Auth;
-use Modules\Admin\Entities\Permission;
-use App\Traits\listNamaRoute;
+use App\Models\Permission;
+use App\Traits\ListNamaRoute;
 use App\Traits\convertRecursive;
 use App\Traits\buatRecursive;
 
@@ -20,7 +20,7 @@ use App\Traits\buatRecursive;
 
 class AdminController extends Controller
 {
-    use listNamaRoute,convertRecursive,buatRecursive;
+    use ListNamaRoute,convertRecursive,buatRecursive;
     /**
      * Display a listing of the resource.
      * @return Renderable
@@ -42,16 +42,16 @@ class AdminController extends Controller
         }
         
     }
-    public function index()
-    {
+    public function index(){
 
-    
         $user = Auth::user();
     
         $permissions = $user->permissions;
 
-        $arrRolePermissions = collect(); // permission didalam role
-        $arrPermissionMenu = collect(); //menu has permission
+        $arrRolePermissions = collect(); 
+        // permission didalam role
+        $arrPermissionMenu = collect(); 
+        //menu has permission
         $arrRoleMenu = collect(); //menu has role
         // $user->roles->append(['menurole']); //append atribute role
         // return $user->roles;
@@ -72,10 +72,45 @@ class AdminController extends Controller
         $semuaPermission = $permissions->merge($arrRolePermissions);  //gabung semua permission dari role dan dari has user
     
         $menu =  $semuaPermission->map(function($item) use (&$arrPermissionMenu){ //list menu dari permission dan permission di dalam role
-        
+            // return $item->menu;
             $menu  = $item->menu->map(function($item)use (&$arrPermissionMenu){
+                //  return $item;
+                if ($item->menuitem !== null) {
+                    if (count($item->menuitem->children) == 0) {
+                        $item = collect([
+                            "id"=> $item->menuitem->id,
+                            "id_menu"=>$item->menuitem->id_menu,
+                            "id_parent"=>$item->menuitem->id_parent,
+                            "title"=>$item->menuitem->title,
+                            "url"=>$item->menuitem->url,
+                            "name_route"=>$item->menuitem->name_route,
+                            "icon"=>$item->menuitem->icon,
+                            "children" => $item->menuitem->children,
+                            "parent" => $item->menuitem->parent,
+                            "deleted_at"=>$item->menuitem->deleted_at,
+                            "created_at"=>$item->menuitem->created_at,
+                            "updated_at"=>$item->menuitem->updated_at,
+                            "menu"=>collect($item->menuitem->menu)]
+        
+                        );
+                        $arrPermissionMenu->push($item); 
+                    }
+                }
+            
+            
+            });
+            
+        });
+
+        
+
+        $menuRole = $arrRoleMenu->map(function($item){ //list menu dari role
+            
+            if ($item->menuitem !== null) {
+                # code...
                 if (count($item->menuitem->children) == 0) {
-                    $item = collect([
+                    
+                    return [
                         "id"=> $item->menuitem->id,
                         "id_menu"=>$item->menuitem->id_menu,
                         "id_parent"=>$item->menuitem->id_parent,
@@ -84,41 +119,15 @@ class AdminController extends Controller
                         "name_route"=>$item->menuitem->name_route,
                         "icon"=>$item->menuitem->icon,
                         "children" => $item->menuitem->children,
-                        'tes'=> count($item->menuitem->children),
                         "parent" => $item->menuitem->parent,
                         "deleted_at"=>$item->menuitem->deleted_at,
                         "created_at"=>$item->menuitem->created_at,
                         "updated_at"=>$item->menuitem->updated_at,
-                        "menu"=>collect($item->menuitem->menu)]
-    
-                    );
-                    $arrPermissionMenu->push($item); 
+                        "menu"=>collect($item->menuitem->menu)
+                    ];
                 }
-            
-            });
-            
-        });
-
-        // return $arrPermissionMenu;
-
-        $menuRole = $arrRoleMenu->map(function($item){ //list menu dari role
-            if (count($item->menuitem->children) == 0) {
-                return [
-                    "id"=> $item->menuitem->id,
-                    "id_menu"=>$item->menuitem->id_menu,
-                    "id_parent"=>$item->menuitem->id_parent,
-                    "title"=>$item->menuitem->title,
-                    "url"=>$item->menuitem->url,
-                    "name_route"=>$item->menuitem->name_route,
-                    "icon"=>$item->menuitem->icon,
-                    "children" => $item->menuitem->children,
-                    "parent" => $item->menuitem->parent,
-                    "deleted_at"=>$item->menuitem->deleted_at,
-                    "created_at"=>$item->menuitem->created_at,
-                    "updated_at"=>$item->menuitem->updated_at,
-                    "menu"=>collect($item->menuitem->menu)
-                ];
             }
+        
         })->filter();
     
         $menucollect = collect();
@@ -158,7 +167,6 @@ class AdminController extends Controller
                 'id_header' => $header['menu']['id'],
                 'header' => $header['menu']['name'],
                 'order' => $header['menu']['order'],
-            
                 // 'menuparent'=> $menuAnak,
                 'menu' => $menuAkhir
             );
@@ -186,9 +194,9 @@ class AdminController extends Controller
 
         $menu = $group->push($menuDashboard);
         
-        // return $menu->sortBy('order')->values()->all();
+        return $menu->sortBy('order')->values()->all();
     
-        return $this->namaRoute();
+        // return $this->namaRoute();
     
 
 

@@ -1,9 +1,7 @@
 <template>
 
     <li class="items-center">
-        <!-- <SidebarLink :href="route('role.index')" :active="route().current('role.index')">
-                            Dashboard
-                        </SidebarLink> -->
+
         <SidebarLink :href="route().has(item.name_route)?route(item.name_route):'' " :child="item.children" @clicked="toggleCollapsed" :collapsed="collapsed"
             :depth="kedalaman" :isChild="isChild" :active="route().current(item.name_route)" :icon="'fas fa-tv mr-2 text-sm'">
             {{ item.title }}
@@ -23,6 +21,7 @@
 
 <script>
 import SidebarLink from "@/Components/Sidebar/SidbarLink.vue";
+
 export default {
 
 
@@ -44,3 +43,4 @@ export default {
     }
 };
 </script>
+  

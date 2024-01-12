@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Traits;
-
 trait flattenRecursive{
     protected $result = [];
     private function convertArrToObj($arr){
@@ -14,6 +13,8 @@ trait flattenRecursive{
                     "is_parent"=> intval($value["is_parent"]),
                     "id_parent" => intval($value['id_parent']),
                     "id_menu" => $value['id_menu'],
+                    'permission' => $value['permission']->pluck('id_permissions'),
+                    'role' => $value['role']->pluck('id_roles'),
                     "url" => $value['url'],
                     "name_route" => $value['name_route'],
                     "icon" => $value['icon'],
@@ -28,6 +29,8 @@ trait flattenRecursive{
                     "is_parent"=> intval($value["is_parent"]),
                     "id_parent" => intval($value['id_parent']),
                     "id_menu" => $value['id_menu'],
+                    'permission' => $value['permission']->pluck('id_permissions'),
+                    'role' => $value['role']->pluck('id_roles'),
                     "url" => $value['url'],
                     "name_route" => $value['name_route'],
                     "icon" => $value['icon'],

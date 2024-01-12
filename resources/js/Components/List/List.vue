@@ -7,7 +7,7 @@
               :class="{'bg-red-500': highlight, 'bg-white': !highlight}" 
              >
             <div class="flex-1 pl-1">
-                <div class="font-medium text-blueGray-700" :class="[`translate-x-[${this.depth}rem]`]">
+                <div class="font-medium text-blueGray-700 w-64 uppercase" :class="[`translate-x-[${this.depth}rem]`]">
                     <i
                         :class="[item.children.length > 0 ? 'fas fa-folder-open opacity-75' : ' fas fa-file text-blueGray-300']">
                     </i>
@@ -18,11 +18,11 @@
             
             <div class=" inline-flex rounded-md shadow-sm " role="group">
             <button type="button" 
+            v-on:click="handleClickadd(item)"
                 class="inline-flex items-center px-4 py-2 text-sm font-medium text-grey-700 bg-transparent border border-blue-500 rounded-l-lg
                 shadow transition ease-in-out duration-150  
                 hover:bg-blue-500 hover:text-white 
-                focus:outline-none focus:ring-2 focus:ring-blue-700 focus:bg-blue-500 focus:text-white focus:z-[1]
-                dark:border-white dark:text-white dark:hover:text-white dark:hover:bg-blue-700 dark:focus:bg-blue-700">
+                focus:outline-none focus:ring-2 focus:ring-blue-700 focus:bg-blue-500 focus:text-white focus:z-[1]">
                 <i class="fas fa-lg fa-plus "></i>
             </button>
             <button type="button" 
@@ -43,8 +43,7 @@
                 class="inline-flex items-center px-4 py-2 text-sm font-medium text-grey-700 bg-transparent border border-blue-500 rounded-r-md 
                 shadow transition ease-in-out duration-150  
                 hover:bg-red-500 hover:text-white
-                focus:outline-none focus:ring-2 focus:ring-blue-700 focus:bg-red-500 focus:text-white 
-                dark:border-white dark:text-white dark:hover:text-white dark:hover:bg-red-700 dark:focus:bg-red-700">
+                focus:outline-none focus:ring-2 focus:ring-blue-700 focus:bg-red-500 focus:text-white ">
                 <i class="fas fa-lg fa-trash-alt"></i>
             </button>
             </div>
@@ -71,7 +70,7 @@
         </div>
     </div>
     <template v-if="item.children">
-        <List v-for="menu in item.children" :item="menu" :depth="kedalaman + 1" />
+        <List v-for="menu in item.children" :item="menu" :depth="kedalaman + 1"  @clickadd="clickadd" />
     </template>
 </template>
 <script>
@@ -79,7 +78,7 @@
 
 export default {
 
-
+    emits: ['clickadd'],
     props: ['item', 'depth'],
 
     data() {
@@ -96,7 +95,14 @@ export default {
         };
 
     },
+    
     methods: {
+        clickadd(value){
+            this.$emit('clickadd', value);
+        },
+        handleClickadd(value) {
+            this.$emit('clickadd', value);
+        },
         startDrag(evt, item) {
             evt.dataTransfer.dropEffect = 'move'
             evt.dataTransfer.effectAllowed = 'move'

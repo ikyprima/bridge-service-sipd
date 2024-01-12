@@ -13,7 +13,7 @@
 
       <Link :href="route('dashboard')"
         class="md:block text-left md:pb-2 text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0">
-      Vue Notues
+     Sukoati Admin
       </Link>
       <!-- User -->
       <ul class="md:hidden items-center flex flex-wrap list-none">
@@ -36,7 +36,7 @@
 
               <Link :href="route('dashboard')"
                 class="md:block text-left md:pb-2 text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0">
-              Vue Notuesa
+              Sukoati Admin
               </Link>
             </div>
             <div class="w-6/12 flex justify-end">
@@ -56,8 +56,9 @@
           </div>
         </form>
         <!-- Divider -->
-        
         <div v-for="(data, index) in $page.props.menu">
+
+
           <hr class="my-4 md:min-w-full" />
           <!-- Heading -->
           <h6 class="md:min-w-full text-blueGray-500 text-xs uppercase font-bold block pt-1 pb-4 no-underline">
@@ -67,17 +68,16 @@
           <!-- <ul class="md:flex-col md:min-w-full flex flex-col list-none">
             <li class="items-center">
 
-              <ResponsiveNavLink :href="route('role.index')" :active="route().current('role.index')">
-                            Dashboard
-                        </ResponsiveNavLink>
-             
+              <SidebarLink v-for="( data, index ) in data.menu" :key="data.id" :href="route().has(data.name_route)?route(data.name_route):''"
+                :active="route().current(data.name_route)" :icon="'fas fa-tv mr-2 text-sm'">
+                {{ data.title }}
+
+              </SidebarLink>
 
             </li>
 
           </ul> -->
-          
           <ul class="md:flex-col md:min-w-full flex flex-col list-none">
-            
           <MenuItem v-for="item in data.menu" :item="item" :items="item.children" :key="item.id" :isChild="false" :depth="0">
           </MenuItem> 
         </ul>
@@ -96,7 +96,7 @@ import NotificationDropdown from "@/Components/Dropdowns/NotificationDropdown.vu
 import UserDropdown from "@/Components/Dropdowns/UserDropdown.vue";
 import SidebarLink from "@/Components/Sidebar/SidbarLink.vue";
 import MenuItem from "@/Components/Sidebar/Menu.vue";
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+
 
 import { Link } from '@inertiajs/vue3';
 
@@ -154,8 +154,7 @@ export default {
     UserDropdown,
     Link,
     SidebarLink,
-    MenuItem,
-    ResponsiveNavLink
+    MenuItem
   },
 };
 </script>

@@ -6,7 +6,7 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
-use App\Traits\listMidleware;
+use App\Traits\ListMidleware;
 use Modules\Admin\Entities\Permission;
 use Auth;
 use Validator;
@@ -41,6 +41,7 @@ class PermissionController extends Controller
         return Inertia::render('Admin/Permissions',[
             'permission'=>$permission
         ]);
+    
 
     }
 

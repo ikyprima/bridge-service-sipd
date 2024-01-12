@@ -29,7 +29,7 @@ trait listController{
     }
     public function namaController(){
         //nama controller spesifik path
-          $controllers = require_once base_path('vendor/composer/autoload_classmap.php');
+        $controllers = require_once base_path('vendor/composer/autoload_classmap.php');
         $controllers = array_keys($controllers);
         $controllers = array_filter($controllers, function ($controller) {
             return strpos($controller, 'Modules\Pegawai\Http\Controllers') !== false;
