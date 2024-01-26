@@ -5,14 +5,17 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use TokenHelper;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\LraImport;
 class AklapController extends Controller
 {
 
-    public function login(Request $request){
+    public function login(){
         
         $token =  Storage::get('token_aklap.txt');
         $decoded = TokenHelper::decodeToken($token);
-        $url = 'https://sipd.kemendagri.go.id/aklap/v1/api/auth/login';
+        // https://peta.sipd.kemendagri.go.id/aklap/v1/api/auth/login
+        $url = 'https://peta.sipd.kemendagri.go.id/aklap/v1/api/auth/login';
         $response = Http::withOptions(["verify"=>false])->post($url,[
             'username' =>  $decoded['username'],
             'password' =>  $decoded['password'],
@@ -60,7 +63,7 @@ class AklapController extends Controller
             //                 "nama_skpd"=>$request->nama_skpd
             //             )
             // );
-            if ($request->tipeFile === 'xls') {
+            if ($request->tipeFile === 'xls' || $request->tipeFile === 'json' ) {
                 # code...
                 $searchParam = array(
                     "tanggalFrom"=> $request->tanggalFrom,
@@ -104,20 +107,44 @@ class AklapController extends Controller
             $json = json_encode($searchParam);
             $encodedQueryString = urlencode($json);
     
-            $url = 'https://sipd.kemendagri.go.id/aklap/v1/api/report/cetaklra?searchparams='.$encodedQueryString;
+            $url = 'https://peta.sipd.kemendagri.go.id/aklap/v1/api/report/cetaklra?searchparams='.$encodedQueryString;
             // $url ='https://sipd.kemendagri.go.id/aklap/v1/api/common/list-skpd';
             // $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9zaXBkLmtlbWVuZGFncmkuZ28uaWRcL2FwaVwvYXV0aFwvbG9naW4iLCJpYXQiOjE2ODYxMjU5NDUsImV4cCI6MjQwNjEyNTk0NSwibmJmIjoxNjg2MTI1OTQ1LCJqdGkiOiI4UEFkQmcxMEJLVnN6YVh3Iiwic3ViIjoxOTA0NTUsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjciLCJ0YWh1biI6MjAyMywiaWRfZGFlcmFoIjoxODB9.qXtucCisgGVAjbKh9A7jBcCdJ0prFDFPUBkXGp0U0X8";
             $token = $cookie->access_token;
             $response = Http::withToken($token)->withOptions(["verify"=>false])->get($url);
             
             $data = $response->object();
-           
             if ( $data == null ){
-                // $pdfContent = $response->body();
-                // $pdfFileName = 'filetes.xlsx'; 
-                // $pdfFilePath = storage_path('app/' . $pdfFileName);
-                // file_put_contents($pdfFilePath, $pdfContent);
-                return $response->body();
+                
+                //jika respon tipe file 
+                //return $response->body();
+                //---------------
+                //jika ingin simpan respon tipe file dan ubah ke json (misal xls ke json)
+                if ($request->tipeFile === 'json') {
+                    $pdfContent = $response->body();
+                    $pdfFileName = 'filetes.xlsx'; 
+                    $pdfFilePath = storage_path('app/' . $pdfFileName);
+                    file_put_contents($pdfFilePath, $pdfContent);
+                    $import = new LraImport();
+                    $data = Excel::toCollection($import, Storage::disk('local')->path($pdfFileName));
+                    return collect($data[0])->map(function($item, $index){
+                        if($index > 8 && $item[0] != null && $item[0] != 'Dicetak Oleh SIPD Kementrian Dalam Negeri'){
+                            return [
+                                'kode_rekening'=> $item[0],
+                                'uraian'=>$item[1],
+                                'anggaran'=> $item[2],
+                                'realisasi_2023' =>$item[3],
+                                '%_2023'=> $item[4],
+                                'realisasi_2022'=> $item[5]
+                            ];
+                        }
+                    })->filter()->values();
+
+                    
+                    
+                }else{
+                    return $response->body();
+                }
                 
             }else{
                 
@@ -231,9 +258,9 @@ class AklapController extends Controller
         if($this->cekLogin()){
             $cookieFileContents = Storage::get('cookies_aklap.txt'); 
             $cookie = unserialize($cookieFileContents);
-            $url = 'https://sipd.kemendagri.go.id/aklap/v1/api/common/skpd/get-skpd-report?keyword='.$request->keyword.'&page='.$request->page;
-            $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9zaXBkLmtlbWVuZGFncmkuZ28uaWRcL2FwaVwvYXV0aFwvbG9naW4iLCJpYXQiOjE2ODYxMjU5NDUsImV4cCI6MjQwNjEyNTk0NSwibmJmIjoxNjg2MTI1OTQ1LCJqdGkiOiI4UEFkQmcxMEJLVnN6YVh3Iiwic3ViIjoxOTA0NTUsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjciLCJ0YWh1biI6MjAyMywiaWRfZGFlcmFoIjoxODB9.qXtucCisgGVAjbKh9A7jBcCdJ0prFDFPUBkXGp0U0X8";
-            // $token = $cookie->access_token;
+            $url = 'https://peta.sipd.kemendagri.go.id/aklap/v1/api/common/skpd/get-skpd-report?keyword='.$request->keyword.'&page='.$request->page;
+            // $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9zaXBkLmtlbWVuZGFncmkuZ28uaWRcL2FwaVwvYXV0aFwvbG9naW4iLCJpYXQiOjE2ODYxMjU5NDUsImV4cCI6MjQwNjEyNTk0NSwibmJmIjoxNjg2MTI1OTQ1LCJqdGkiOiI4UEFkQmcxMEJLVnN6YVh3Iiwic3ViIjoxOTA0NTUsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjciLCJ0YWh1biI6MjAyMywiaWRfZGFlcmFoIjoxODB9.qXtucCisgGVAjbKh9A7jBcCdJ0prFDFPUBkXGp0U0X8";
+            $token = $cookie->access_token;
             $response = Http::withToken($token)->withOptions(["verify"=>false])->get($url);
             
             $data = $response->object(); 
