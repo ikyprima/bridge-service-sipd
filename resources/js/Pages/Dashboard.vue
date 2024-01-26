@@ -17,9 +17,9 @@ import { Link } from '@inertiajs/vue3';
                 <template #kontenheader>
 
                     <div class="w-full lg:w-6/12 xl:w-3/12 px-4">
-                        <Link :href="route().has('pegawai.index')?route('pegawai.index'):'' " >
+                        <Link :href="route().has('instance.index')?route('instance.index'):'' " >
                 
-                        <ButtonCard  statSubtitle="Master" statTitle="Pegawai" cursor="cursor-pointer"  ></ButtonCard>
+                        <ButtonCard  statSubtitle="Master" statTitle="Instance" cursor="cursor-pointer"  ></ButtonCard>
                         
                     </Link>
                     
@@ -46,8 +46,8 @@ export default {
     },
     methods: {
         tes () {
-           console.log('tes');
-          },
+            console.log('tes');
+        },
     },
 
     

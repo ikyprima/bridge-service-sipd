@@ -46,6 +46,9 @@ Route::group(['middleware' => ['auth','verified']], function () {
         Route::put('/menu/update-child/{id}','MenuController@updateMenuChild')->name('menu.update.child');
         
         Route::put('/menu/update-parent/{id}','MenuController@updateMenuParent')->name('menu.update.parent');
+
+        // instance 
+        Route::get('/instance', 'InstanceController@index')->name('instance.index');
     });
 });
 
